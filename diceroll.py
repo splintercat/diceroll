@@ -1,16 +1,27 @@
 import math
 import argparse
 import sys
+from fractions import Fraction
 ## calculate the cumulative binomial distribution
 ## basically calculate odds of success given a dice pool size in shadowrun
 
+def floatStr(s):
+  try:
+    n = float(Fraction(s))
+  except:
+    raise argparse.ArgumentTypeError("%s is not a float"%(s,))
+  if n < 0.0 or n > 1.0:
+    raise argparse.ArgumentTypeError("%s is negative or greater than 1"%(s,))
+  return n
+
+
 parser = argparse.ArgumentParser(description="calculate the odds of success for a dice roll")
 
-parser.add_argument('-d', '--dice', type=int, nargs=1, help="number of dice to roll")
-parser.add_argument('-n', '--hits', type=int, nargs=1, help='minimum number of successes/hits')
+parser.add_argument('-d', '--dice', type=int, help="number of dice to roll")
+parser.add_argument('-n', '--hits', type=int, help='minimum number of successes/hits')
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('-s', '--sr', action='store_true', help='use shadorun dice for probability (2.0/6.0)')
-group.add_argument('-p', '--prob', type=float, nargs=1, default=0, help='probability of success for a given die roll.  Please enter the number as a float or your answer will be 0.  1.0/3.0 is ok.  1/3 is bad.')
+group.add_argument('-p', '--prob', type=floatStr, default=0, help='probability of success for a given die roll.  Please enter the number between 0 and 1. Entries like .4 and 1/3 are both accepted')
 
 
 def sigma(func, i, k):
@@ -47,8 +58,8 @@ def cds(k,n,p):
 args =	vars(parser.parse_args())
 print(str(args))
 probability = 0
-hits = args['hits'][0]
-dice = args['dice'][0]
+hits = args['hits']
+dice = args['dice']
 if (args['sr'] == True):
   probability = 1.0/3.0
 else:
